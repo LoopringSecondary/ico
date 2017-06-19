@@ -18,13 +18,13 @@ contract('MTTPToken', function(accounts) {
 
     for (var i = 0; i < tx.logs.length; i++) {
       var log = tx.logs[i];
-      if (log.event == "MttpIcoStarted") {
+      if (log.event == "SaleStarted") {
         return true;
       }
     }
     return false;
   }).then(function(result) {
-      assert.equal(result, true, "no MttpIcoStarted event found")
+      assert.equal(result, true, "no SaleStarted event found")
     });
   });
 
