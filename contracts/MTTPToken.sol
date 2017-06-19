@@ -8,9 +8,9 @@ contract MTTPToken is StandardToken {
   string public constant name = "MTTPToken";
   string public constant symbol = "MTC";
   uint public constant decimals = 18;
+  uint public constant blocksPerPhase = 42000;
   address public target = 0x5B6b68eeC6836cC7017Ba3f39CD022Ca4c377c90;
-  uint firstblock = 0;
-  uint blocksPerPhase = 42000;
+  uint public firstblock = 0;
 
   struct Fee {
     address collector;
@@ -21,22 +21,42 @@ contract MTTPToken is StandardToken {
 
   event MttpIcoStarted(uint firstblock);
 
-  function start(uint _firstblock) public {
-    if (firstblock > 0 ||
-    _firstblock <= block.number ||
-    msg.sender != target) {
+  event CallerNotValid(address caller);
+  event NotStartedYet();
+  event AlreadyStarted(uint firstblock);
+
+  modifier isOwner {
+    if (target == msg.sender) {
+        _;
+    }
+    else CallerNotValid(msg.sender);
+  }
+
+  modifier afterStart {
+    if (firstblock > 0) {
+        _;
+    }
+    else NotStartedYet();
+  }
+
+  modifier beforeStart {
+    if (firstblock == 0) {
+        _;
+    }
+    else AlreadyStarted(firstblock);
+  }
+
+  function startSale(uint _firstblock) public isOwner beforeStart returns (uint) {
+    if (firstblock > 0 || _firstblock <= block.number) {
       throw;
     }
     firstblock = _firstblock;
     MttpIcoStarted(firstblock);
+    return firstblock;
   }
 
-  function addProxy(address proxy, address collector, uint8 percentage) public {
-    if (firstblock > 0 ||
-    msg.sender != target ||
-    percentage > 10 ||
-    collector == 0x0 ||
-    collector == address(this)) {
+  function addProxy(address proxy, address collector, uint8 percentage) public isOwner {
+    if (percentage > 10 || collector == 0x0 || collector == address(this)) {
       throw;
     }
     proxies[proxy] = Fee(collector, percentage); 
@@ -46,8 +66,8 @@ contract MTTPToken is StandardToken {
     createTokens(msg.sender);
   }
 
-  function createTokens(address recipient) payable {
-    if (firstblock == 0 || msg.value == 0) {
+  function createTokens(address recipient) payable afterStart {
+    if (msg.value == 0) {
       throw;
     }
 
