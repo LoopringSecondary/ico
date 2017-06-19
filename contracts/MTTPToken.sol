@@ -9,7 +9,8 @@ contract MTTPToken is StandardToken {
   string public constant symbol = "MTC";
   uint public constant decimals = 18;
   uint public constant blocksPerPhase = 42000;
-  address public target = 0x5B6b68eeC6836cC7017Ba3f39CD022Ca4c377c90;
+  address public target = 0xaea169db31cdd2375bafc08fdb2b56e437edafc6;
+ /* address public target = 0x5B6b68eeC6836cC7017Ba3f39CD022Ca4c377c90; */
   uint public firstblock = 0;
 
   struct Fee {
@@ -20,8 +21,7 @@ contract MTTPToken is StandardToken {
   mapping(address => Fee) public proxies;
 
   event MttpIcoStarted(uint firstblock);
-
-  event CallerNotValid(address caller);
+  event InvalidCaller(address caller);
   event NotStartedYet();
   event AlreadyStarted(uint firstblock);
 
@@ -29,7 +29,7 @@ contract MTTPToken is StandardToken {
     if (target == msg.sender) {
         _;
     }
-    else CallerNotValid(msg.sender);
+    else InvalidCaller(msg.sender);
   }
 
   modifier afterStart {
@@ -46,7 +46,7 @@ contract MTTPToken is StandardToken {
     else AlreadyStarted(firstblock);
   }
 
-  function startSale(uint _firstblock) public isOwner beforeStart returns (uint) {
+  function start(uint _firstblock) public isOwner beforeStart returns (uint) {
     if (firstblock > 0 || _firstblock <= block.number) {
       throw;
     }
