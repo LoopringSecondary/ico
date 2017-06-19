@@ -1,4 +1,4 @@
-var MTTPToken = artifacts.require("./zeppelin/token/MTTPToken.sol")
+var MTTPToken = artifacts.require("./MTTPToken.sol")
 module.exports = function(deployer) {
   deployer.deploy(MTTPToken);
 };
